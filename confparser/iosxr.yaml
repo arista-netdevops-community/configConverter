@@ -1,0 +1,470 @@
+- match: hostname (?P<hostname>\S+)
+- match: domain name (?P<domain>\S+)
+- match: (?:no )?cdp
+  name: cdp_run
+  action: bool
+- match: vrf (\S+)
+  parent: vrf
+  child:
+  - match: description (?P<description>.*)
+  - match: address-family (\S+)
+    child:
+    - match: import route-target
+      name: route-target
+      child:
+        match: (?P<import>.*)
+        actionall: list
+    - match: export route-target
+      name: route-target
+      child:
+        match: (?P<export>.*)
+        actionall: list
+- match: arp redundancy
+  name: arp_sync
+  child:
+    match: group (\d+)
+    parent: group
+    child:
+    - match: peer (?P<peer>\S+)
+    - match: source-interface (?P<source>\S+)
+    - match: interface-list
+      name: interface
+      child:
+        match: interface (\S+) id (?P<id>\d+)
+- match: dhcp ipv4
+  name: dhcp
+  child:
+  - match: profile (\S+) relay
+    parent: profile
+    child:
+      match: helper-address vrf (\S+) (?P<address>\S+)
+      parent: vrf
+      actionall: list
+  - match: interface (\S+) relay profile (?P<profile>\S+)
+    parent: interface
+- match: monitor-session (\S+)
+  parent: monitor_session
+  child:
+    - match: destination (?P<destination>interface) (?P<interface>\S+)
+    - match: 'destination (?P<destination>file)(?: size (?P<size>\d+))?(?: buffer-type (?P<buffer_type>\S+))?'
+    - match: destination (?P<destination>pseudowire)
+- match: redundancy
+  child:
+    match: iccp
+    child:
+      match: group (\d+)
+      parent: group
+      child:
+      - match: mlacp node (?P<node>\d)
+      - match: member
+        child:
+          match: neighbor (?P<neighbor>\S+)
+- match: ipv4 access-list (\S+)
+  parent: ipv4_acl
+  child:
+    match: (\d+) (?P<rule>.*)
+- match: policy-map (\S+)
+  parent: policy_map
+  child:
+    match: class (\S+)
+    parent: class
+- match: nv
+  child:
+    match: satellite (\d+)
+    parent: satellite
+    child:
+    - match: type (?P<type>\S+)
+    - match: description (?P<description>\S+)
+    - match: serial-number (?P<sn>\S+)
+- match: interface (?!preconfigure)(\S+) ?(?P<mode>l2transport)?
+  parent: interface
+  child:
+  - match: description (?P<description>.*)
+  - match: encapsulation (?P<dot1q>untagged)
+  - match: 'encapsulation dot1q (?P<dot1q>\d+)(?: second-dot1q (?P<second_dot1q>\d+))?'
+  - match: rewrite ingress tag pop (?P<pop>\d) symmetric
+  - match: mtu (?P<mtu>\d+)
+  - match: service-policy input (?P<input>\S+)
+    parent: policy
+  - match: service-policy output (?P<output>\S+)
+    parent: policy
+  - match: bundle id (?P<id>\d+) mode (?P<mode>\S+)
+    parent: bundle
+  - match: mlacp iccp-group (?P<iccp_group>\d+)
+  - match: lacp system mac (?P<lacp_sys_mac>\S+)
+  - match: mac-address (?P<mac>\S+)
+  - match: vrf (?P<vrf>\S+)
+  - match: l2transport
+    name: mode
+  - match: ipv4 address (?P<ipv4>.*)
+    actionall: cidr
+  - match: ipv4 access-group (?P<ingress>\S+) ingress
+    parent: ipv4_acl
+  - match: ipv4 access-group (?P<egress>\S+) egress
+    parent: ipv4_acl
+  - match: (?:no )?shutdown
+    name: shutdown
+    action: bool
+  - match: (?:no )?cdp
+    name: cdp_enable
+    action: bool
+  - match: ipv4 helper-address vrf (\S+) (?P<address>\S+)
+    parent: ipv4_helper_vrf
+    actionall: list
+  - match: ipv4 directed-broadcast
+    name: ipv4_features
+    value: directed-broadcast
+    action: list
+  - match: proxy-arp
+    name: ipv4_features
+    action: list
+  - match: ipv6 address (?P<ipv6>.*)
+  - match: ipv6 access-group (?P<ingress>\S+) ingress
+    parent: ipv6_acl
+  - match: ipv6 access-group (?P<egress>\S+) egress
+    parent: ipv6_acl
+  - match: nv
+    child:
+      match: satellite-fabric-link satellite (\d+)
+      name: satellite
+  - match: lacp period (?P<lacp_period>\S+)
+  - match: lldp
+    child:
+      - match: receive disable
+        name: rx
+        value: false
+      - match: transmit disable
+        name: tx
+        value: false
+  - match: ethernet cfm
+    child:
+      - match: (\S+) domain (?P<domain>\S+) service (?P<service>\S+) mep-id (?P<local_mep>\S+)
+        child:
+          - match: sla operation profile (?P<sla_profile>\S+) target mep-id (\S+)
+            parent: remote_mep
+  - match: arp timeout (?P<arp_timeout>\d+)
+  - match: 'monitor-session (\S+) ethernet(?: direction (?P<direction>\S+))?'
+    parent: monitor_session
+    child:
+      match: acl
+      name: acl
+      value: true
+  - match: 'flow (\S+) monitor (?P<monitor>\S+)(?: sampler (?P<sampler>\S+))? (?P<direction>\S+)'
+    parent: flow
+    grouping: implicit
+- match: ethernet cfm
+  child:
+    match: domain (\S+) level (?P<level>\S+)
+    parent: domain
+    child:
+      - match: service (\S+) xconnect group (?P<xconnect_group>\S+) p2p (?P<xconnect>\S+)
+        parent: service
+        child:
+          - match: mep (\S+)
+            child:
+              - match: mep-id (?P<mep>\S+)
+      - match: service (\S+) bridge group (?P<bridge_group>\S+) bridge-domain (?P<bridge_domain>\S+)
+        parent: service
+        child:
+          - match: mep (\S+)
+            child:
+              - match: mep-id (?P<mep>\S+)
+- match: route-policy (\S+)
+  parent: route_policy
+  child:
+    match: \s*(?P<lines>.*)
+    actionall: list
+- match: prefix-set (\S+)
+  parent: prefix_set
+  child:
+    match: \s*(?P<lines>.*)
+    actionall: list
+- match: as-path-set (\S+)
+  parent: as_path_set
+  child:
+    match: \s*(?P<lines>.*)
+    actionall: list
+- match: evpn
+  child:
+  - match: evi (\d+)
+    parent: evi
+    child:
+      match: advertise-mac
+      name: advertise_mac
+      value: true
+  - match: interface (\S+)
+    parent: interface
+    child:
+      match: ethernet-segment
+      child:
+        match: identifier type (?P<type>\d) (?P<esi>\S+)
+- match: l2vpn
+  child:
+  - match: redundancy
+    child:
+      match: iccp group (\d+)
+      parent: iccp_group
+      child:
+      - match: multi-homing node-id (?P<node>\d)
+      - match: interface (?P<interface>\S+)
+        actionall: list
+  - match: xconnect group (\S+)
+    parent: xconnect_group
+    child:
+      match: p2p (\S+)
+      parent: p2p
+      child:
+      - match: description (?P<description>.*)
+      - match: interface (?P<interface>\S+)
+        actionall: list
+      - match: monitor-session (?P<monitor_session>\S+)
+      - match: neighbor ipv[46] (\S+) pw-id (?P<pw_id>\d+)
+        parent: neighbor
+        child:
+        - match: pw-class (?P<pw_class>\S+) 
+        - match: backup neighbor (\S+) pw-id (?P<pw_id>\d+)
+          parent: backup_neighbor
+          child:
+            match: pw-class (?P<pw_class>\S+)
+      - match: neighbor evpn evi (\d+) target (?P<target>\d+) source (?P<source>\d+)
+        parent: evi
+  - match: bridge group (\S+)
+    parent: bridge_group
+    child:
+      match: bridge-domain (\S+)
+      parent: bridge_domain
+      child:
+      - match: description (?P<description>.*)
+      - match: storm-control unknown-unicast pps (?P<uucast>\d+)
+        parent: storm_control
+      - match: storm-control multicast pps (?P<mcast>\d+)
+        parent: storm_control
+      - match: storm-control broadcast pps (?P<bcast>\d+)
+        parent: storm_control
+      - match: mac
+        child:
+        - match: aging
+          child:
+            match: time (?P<time>\d+)
+        - match: secure
+          child:
+            match: logging
+            name: logging
+            value: true
+      - match: igmp snooping profile (?P<igmp>\S+)
+      - match: interface (\S+)
+        parent: interface
+        child:
+          match: split-horizon group
+          name: split_horizon_group
+          value: 2
+      - match: vfi (\S+)
+        parent: vfi
+        child:
+        - match: vpn-id (?P<vpn_id>\d+)
+        - match: neighbor (\S+) pw-id (?P<pw_id>\d+)
+          parent: neighbor
+      - match: routed interface (\S+)
+        parent: routed_interface
+        child:
+          match: split-horizon group core
+          name: split_horizon_group
+          value: 1
+      - match: evi (?P<evi>\d+)
+- match: router static
+  name: static
+  child:
+  - match: address-family (\S+)
+    child:
+    - match: '([^! ]+)(?: vrf (?P<vrf>\S+))?(?: (?=[A-Tn])(?P<interface>\S+))?(?: (?=(?:\S*[\.:])+)(?P<nexthop>\S+))?(?: (?P<distance>\d+))?(?: tag (?P<tag>\d+))?(?: description "?(?P<description>[^"]*)"?)?(?: track (?P<track>\S+))?'
+      grouping: implicit
+  - match: vrf (\S+)
+    parent: vrf
+    child:
+      match: address-family (\S+)
+      parent: af
+      child:
+      - match: '([^! ]+)(?: vrf (?P<vrf>\S+))?(?: (?=[A-Tn])(?P<interface>\S+))?(?: (?=(?:\S*[\.:])+)(?P<nexthop>\S+))?(?: (?P<distance>\d+))?(?: tag (?P<tag>\d+))?(?: description "?(?P<description>[^"]*)"?)?(?: track (?P<track>\S+))?'
+        grouping: implicit
+- match: router bgp (?P<local_as>\d+)
+  name: bgp
+  child:
+  - match: neighbor-group (\S+)
+    parent: neighbor_group
+    child:
+    - match: remote-as (?P<remote_as>\S+)
+    - match: local-as (?P<local_as>\S+)
+    - match: bfd minimum-interval (?P<bfd_int>\d+)
+    - match: bfd multiplier (?P<bfd_mul>\d+)
+    - match: bfd fast-detect
+      name: bfd
+      action: bool
+    - match: password encrypted (?P<password>\S+)
+      actionall: decrypt7
+    - match: description (?P<description>.*)
+    - match: update-source (?P<update_source>\S+)
+    - match: address-family (\S+) unicast
+      parent: af
+      child:
+      - match: route-policy (?P<in>\S+) in
+        parent: route_policy
+      - match: route-policy (?P<out>\S+) out
+        parent: route_policy
+  - match: neighbor (\S+)
+    parent: neighbor
+    child:
+    - match: description (?P<description>.*)
+    - match: use neighbor-group (?P<neighbor_group>\S+)
+  - match: vrf (\S+)
+    parent: vrf
+    child:
+    - match: default-information originate
+      name: default_originate
+      value: true
+    - match: rd (\S+)
+      name: rd
+    - match: address-family (\S+) unicast
+      parent: af
+      child:
+        match: redistribute (\S+)
+        name: redistribute
+        action: list
+    - match: address-family ipv4 (\S+)
+      parent: af
+    - match: neighbor (\S+)
+      parent: neighbor
+      child:
+      - match: remote-as (?P<remote_as>\S+)
+      - match: ebgp-multihop (?P<ebgp_multihop>\S+)
+      - match: local-as (?P<local_as>\S+)
+      - match: bfd minimum-interval (?P<bfd_int>\d+)
+      - match: bfd multiplier (?P<bfd_mul>\d+)
+      - match: bfd fast-detect
+        name: bfd
+        action: bool
+      - match: password encrypted (?P<password>\S+)
+        actionall: decrypt7
+      - match: description (?P<description>.*)
+      - match: update-source (?P<update_source>\S+)
+      - match: address-family (\S+) unicast
+        parent: af
+        child:
+        - match: route-policy (?P<in>\S+) in
+          parent: route_policy
+        - match: route-policy (?P<out>\S+) out
+          parent: route_policy
+      - match: use neighbor-group (?P<neighbor_group>\S+)
+- match: router hsrp
+  name: hsrp
+  child:
+    match: interface (\S+)
+    parent: interface
+    child:
+    - match: hsrp bfd minimum-interval (?P<bfd_int>\d+)
+    - match: hsrp bfd multiplier (?P<bfd_mul>\d+)
+    - match: hsrp delay minimum (?P<min>\d+) reload (?P<reload>\d+)
+    - match: address-family (\S+)
+      parent: af
+      child:
+        match: 'hsrp (\d+)(?: version (?P<version>\d))?'
+        parent: hsrp
+        child:
+        - match: timers (?P<hello>\d+) (?P<hold>\d+)
+        - match: 'preempt(?: delay (?P<delay>\d+))?'
+          name: preempt
+          value: true
+        - match: priority (?P<priority>\d+)
+        - match: address (?P<address>\S+)$
+        - match: address (?P<secondary>\S+) secondary
+          actionall: list
+        - match: address global (?P<address>\S+)
+        - match: address linklocal (?P<linklocal>\S+)
+        - match: bfd fast-detect peer ipv[46] (?P<bfd_peer>\S+)
+- match: multicast-routing
+  name: multicast
+  child:
+    match: vrf (\S+)
+    parent: vrf
+    child:
+      match: address-family (\S+)
+      parent: af
+- match: router igmp
+  name: igmp
+  child:
+    match: vrf (\S+)
+    parent: vrf
+    child:
+      match: version (?P<version>\d+)
+- match: router msdp
+  name: msdp
+  child:
+    match: vrf (\S+)
+    parent: vrf
+    child:
+    - match: connect-source (?P<connect_source>\S+)
+    - match: originator-id (?P<originator_id>\S+)
+    - match: peer (\S+)
+      parent: peer
+      child:
+        match: mesh-group (?P<mesh_group>\S+)
+- match: (?:no )?lldp
+  name: lldp_run
+  action: bool
+- match: router pim
+  name: pim
+  child:
+    match: vrf (\S+)
+    parent: vrf
+    child:
+      match: address-family (\S+)
+      parent: af
+      child:
+      - match: dr-priority (?P<dr_priority>\d+)
+      - match: rp-address (?P<rp>\S+)
+      - match: interface (\S+)
+        parent: interface
+        child:
+        - match: bfd minimum-interval (?P<bfd_int>\d+)
+        - match: bfd multiplier (?P<bfd_mul>\d+)
+        - match: bfd fast-detect
+          name: bfd
+          action: bool
+- match: ipsla
+  child:
+  - match: operation (\d+)
+    parent: op
+    child:
+      match: type (\S+) (?P<sub_type>\S+)
+      parent: type
+      child:
+      - match: tag (?P<tag>\S+)
+      - match: vrf (?P<vrf>\S+)
+      - match: source address (?P<source_ip>\S+)
+      - match: destination address (?P<dest_ip>\S+)
+      - match: packet count (?P<num_packets>\d+)
+      - match: packet interval (?P<interval>\d+)
+      - match: timeout (?P<timeout>\d+)
+      - match: tos (?P<tos>\d+)
+      - match: frequency (?P<frequency>\d+)
+  - match: schedule operation (\d+)
+    parent: op
+    child:
+    - match: start-time (?P<start>.*)
+    - match: life (?P<life>\S+)
+    - match: ageout (?P<ageout>\d+)
+- match: flow exporter-map (\S+)
+  parent: flow_exp
+  child:
+  - match: transport udp (?P<transport>\d+)
+  - match: source (?P<source>\S+)
+  - match: 'destination (?P<dest>\S+)(?: vrf (?P<vrf>\S+))?'
+  - match: version (?P<version>\S+)
+- match: flow monitor-map (\S+)
+  parent: flow_mon
+  child:
+  - match: record (?P<record>\S+)
+  - match: exporter (?P<exporter>\S+)
+- match: sampler-map (\S+)
+  parent: flow_sam
+  child:
+    match: random 1 out-of (?P<interval>\d+)

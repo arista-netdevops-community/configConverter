@@ -1,0 +1,683 @@
+vlan 5
+ name mgmt
+!
+vlan 23
+ name infra
+!
+vlan 99
+ name V99
+!
+vlan 210
+ name V210
+!         
+vlan 211
+ name V211
+!
+vlan 214
+ name V214
+!
+vlan 218
+ name V218
+!
+vlan 220
+ name V220
+!
+vlan 221
+ name V221
+!
+vlan 222
+ name V222
+!
+vlan 228
+ name V228
+!
+vlan 230
+ name V230
+!
+vlan 234
+ name V234
+!
+vlan 245
+ name V245
+!
+vlan 251
+ name V251
+!
+vlan 267
+ name V267
+!
+vlan 280
+ name V280
+!
+vlan 291
+ name V291
+!
+vlan 294
+ name V294
+!
+vlan 317
+ name V317
+!         
+vlan 343
+ name V343
+!
+vlan 346
+ name V346
+!
+vlan 378
+ name V378
+!
+vlan 427
+ name V427
+!
+vlan 443
+ name V443 
+!
+vlan 448
+ name V448
+!
+vlan 455
+ name V455
+!
+vlan 499
+ name V499
+!
+vlan 574
+ name V574
+!
+vlan 575
+ name V575
+!
+vlan 577
+ name V577
+!
+vlan 583
+ name V583:NTPDNS1
+!
+vlan 998
+ name NOACCESS:V998
+!
+interface Port-channel1
+ description trk
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 10.00
+ storm-control action trap
+!
+interface Port-channel2
+ description trk
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-1999,2200-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 10.00
+ storm-control action trap
+!
+interface FastEthernet1
+ ip vrf forwarding mgmtVrf
+ no ip address
+ speed auto
+ duplex auto
+!
+interface GigabitEthernet1/1
+!
+interface GigabitEthernet1/2
+ shutdown
+!
+interface GigabitEthernet1/3
+ description $cust_billing_id
+ switchport access vlan 221
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/4
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/5
+ description $cust_billing_id
+ switchport access vlan 343
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ speed 100
+ duplex full
+ storm-control broadcast level 5.00 3.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/6
+ description $cust_billing_id
+ switchport access vlan 267
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/7
+!
+interface GigabitEthernet1/8
+ description $cust_billing_id
+ switchport access vlan 234
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit200Mbps
+ service-policy output PM-G-RateLimit200Mbps
+!
+interface GigabitEthernet1/9
+ description $cust_billing_id
+ switchport access vlan 230
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit20Mbps
+ service-policy output PM-G-RateLimit20Mbps
+!
+interface GigabitEthernet1/10
+ description $cust_billing_id
+ switchport access vlan 455
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/11
+ description AVAILABLE
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/12
+ description $cust_billing_id
+ switchport access vlan 378
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/13
+ description $cust_billing_id
+ switchport access vlan 210
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/14
+ description $cust_billing_id
+ switchport access vlan 211
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/15
+ description $cust_billing_id
+ switchport access vlan 317
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/16
+ description $cust_billing_id
+ switchport access vlan 99
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ spanning-tree guard root
+!
+interface GigabitEthernet1/17
+ description $cust_billing_id:V346
+ switchport access vlan 346
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/18
+ description AVAILABLE
+ shutdown
+!
+interface GigabitEthernet1/19
+ description $cust_billing_id
+ switchport access vlan 448
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/20
+ description :V998:
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/21
+ description $cust_billing_id
+ switchport access vlan 443
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 8.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/22
+!
+interface GigabitEthernet1/23
+ description :V998
+ shutdown
+!
+interface GigabitEthernet1/24
+ description $cust_billing_id
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/25
+ description AVAILABLE
+ switchport access vlan 998
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ shutdown
+ storm-control broadcast level 8.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/26
+ description AVAILABLE
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/27
+ description $cust_billing_id
+ switchport access vlan 218
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/28
+!
+interface GigabitEthernet1/29
+ description $cust_billing_id
+ switchport access vlan 267
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/30
+ description $cust_billing_id
+ switchport access vlan 220
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/31
+ description AVAILABLE
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/32
+ description $cust_billing_id
+ switchport access vlan 455
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 8.00 5.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/33
+ description $cust_billing_id
+ switchport access vlan 214
+ switchport mode access
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/34
+ description $cust_billing_id
+ switchport access vlan 499
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 8.00 5.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+!
+interface GigabitEthernet1/35
+ description $cust_billing_id
+ switchport access vlan 575
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ storm-control broadcast level 5.00 3.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+!
+interface GigabitEthernet1/36
+ description :V998:
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/37
+ description $cust_billing_id
+ switchport access vlan 228
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/38
+ description $cust_billing_id
+ switchport access vlan 280
+ switchport mode access
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/39
+ description AVAILABLE
+ shutdown
+!
+interface GigabitEthernet1/40
+ description $cust_billing_id
+ switchport access vlan 251
+ switchport mode access
+ logging event link-status
+ storm-control broadcast level 8.00
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/41
+ description $cust_billing_id
+ switchport access vlan 222
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+ service-policy input PM-G-RateLimit100Mbps
+ service-policy output PM-G-RateLimit100Mbps
+!
+interface GigabitEthernet1/42
+ description AVAILABLE
+ switchport access vlan 998
+ shutdown
+!
+interface GigabitEthernet1/43
+ description $cust_billing_id
+ switchport access vlan 294
+ switchport mode access
+ mtu 9198
+ logging event link-status
+ speed auto 10 100
+ storm-control broadcast level 5.00 3.00
+ storm-control action shutdown
+ storm-control action trap
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/44
+ description $cust_billing_id
+ switchport access vlan 245
+ switchport mode access
+ switchport nonegotiate
+ mtu 9198
+ logging event link-status
+ no snmp trap link-status
+ storm-control broadcast level 1.00
+ storm-control action shutdown
+ storm-control action trap
+ no lldp transmit
+ no lldp receive
+ no cdp enable
+ spanning-tree guard root
+!
+interface GigabitEthernet1/45
+ description trk
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ udld port
+ storm-control broadcast level 10.00
+ storm-control action trap
+ no cdp enable
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/46
+ description trk
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-1999,2200-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ udld port
+ storm-control broadcast level 10.00
+ storm-control action trap
+ no cdp enable
+ channel-group 2 mode active
+!
+interface GigabitEthernet1/47
+ description trk
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ udld port
+ storm-control broadcast level 10.00
+ storm-control action trap
+ no cdp enable
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/48
+ description trk
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 1-997,999-1999,2200-4094
+ switchport mode trunk
+ switchport nonegotiate
+ mtu 9198
+ udld port
+ storm-control broadcast level 10.00
+ storm-control action trap
+ no cdp enable
+ channel-group 2 mode active
+!
+interface Vlan1
+ no ip address
+!
+interface Vlan5
+ description mgmt
+ ip address 10.255.10.46 255.255.255.128
+ no ip redirects
+ no ip proxy-arp
+ shutdown
+!
+interface Vlan23
+ ip address 172.23.136.158 255.255.252.0
+ no ip redirects
+ no ip proxy-arp
+!
