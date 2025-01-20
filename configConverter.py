@@ -224,7 +224,7 @@ def setPolicyMaps(policyMapName, policyMap):
                     newClass["police"].pop("exceed_action")
                 except:
                     pass
-    newPolicyMap["classes"].append(deepcopy(newClass))
+        newPolicyMap["classes"].append(deepcopy(newClass))
 
     #if len(policyMap) > 0:
         #print("POLICYMAP")
