@@ -300,6 +300,10 @@ if "class_map" in dev:
 for interface, interfaceConfig in dev["interface"].items():
     if interface.startswith("Gigabit"):
         newDevice["ethernet_interfaces"].append(setupInterface(interface, interfaceConfig, newDevice["policy_maps"]))
+    elif interface.startswith("TenGiga"):
+        newInterfaceName = "InvalidInterface1/10000"
+        notifications.append(f"!!!!!!!!!!!!!!! added an invalid interface: {interface} -> {newInterfaceName}")
+        newDevice["ethernet_interfaces"].append(setupInterface(newInterfaceName, interfaceConfig, newDevice["policy_maps"]))
     elif interface.startswith("Vlan"):
         newDevice["vlan_interfaces"].append(setupInterface(interface, interfaceConfig, newDevice["policy_maps"]))
     elif interface.startswith("Port"):
