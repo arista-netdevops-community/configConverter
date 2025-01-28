@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", required=True, help="input file")
 parser.add_argument("--dissector", default="ios.yaml", help="dissector file. default=ios.yaml")
 parser.add_argument("--output", default="text", help="default=text, text|yaml")
+parser.add_argument("--debug", default=False, action="store_true", help="emit some debug values")
 
 args = parser.parse_args()
 
@@ -239,6 +240,9 @@ def setPolicyMaps(policyMapName, policyMap):
 
 dissector = confparser.Dissector.from_file(args.dissector)
 dev = dissector.parse_file(args.i)
+
+if args.debug:
+    print(dev)
 
 newDevice = {
         "ethernet_interfaces": [],
