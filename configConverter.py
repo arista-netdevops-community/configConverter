@@ -193,7 +193,7 @@ def setupInterface(interface, oldInterface, policyMaps):
 
 def setClassMaps(classMapName, classMap):
     newClassMap = {"name": classMapName}
-    if classMap.get("match", "") == "all":
+    if classMap.get("lines", "").find("any") >= 0:
         newClassMap["ip"] = { "access_group": "matchAllv4" }
         newClassMap["ipv6" ] = { "access_group": "matchAllv6" }
 
@@ -241,14 +241,47 @@ newDevice = {
         "vlan_interfaces": [],
         "port_channel_interfaces": [],
         "class_maps": {},
-        "policy_maps": {}
+        "policy_maps": {},
 }
 
 if "class_map" in dev:
+    matchAny = False
     newDevice["class_maps"]["qos"] = []
     for classMapName, classMap in dev["class_map"].items():
+        matchAny = True
         newDevice["class_maps"]["qos"].append(setClassMaps(classMapName, classMap))
     dev.pop("class_map")
+
+    # we are going to make a huge assumption here and create the match any acls if we had
+    #  any class-map in the config
+
+    if matchAny:
+        newDevice["ip_access_lists"] = [
+                {
+                    "name": "matchAllv4",
+                    "entries": [
+                        {
+                            "sequence": 10,
+                            "action": "permit",
+                            "protocol": "ip",
+                            "source": "any",
+                            "destination": "any"
+                        }
+                    ]
+                }
+        ]
+        newDevice["ipv6_access_lists"] = [
+                {
+                    "name": "matchAllv6",
+                    "sequence_numbers": [
+                        {
+                            "sequence": 10,
+                            "action": "permit ipv6 any any",
+                        }
+                    ]
+                }
+        ]
+
 
     if "policy_map" in dev:
         newDevice["policy_maps"]["qos"] = []

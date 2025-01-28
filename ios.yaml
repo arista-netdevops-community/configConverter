@@ -69,6 +69,8 @@
   child:
     match: \s*(?P<lines>match vlan.*)
     actionall: list
+  child:
+    match: \s*(?P<lines>match.*)
 - match: policy-map (?!system-cpp)(\S+)
   parent: policy_map
   child:
@@ -350,3 +352,35 @@
   - match: (?:no )?shutdown
     name: shutdown
     action: bool
+- match: aaa (\S+) (\S+) (.*)
+  key: 1
+  value: 3
+  parent: aaa
+#
+#- match: aaa authorization (\S+) (.*)
+  #name: aaa_authorization
+  #grouping: explicit
+  #value: 2
+#  grouping: implicit
+#- match: aaa authorization (\S+) (.*)$
+#  name: aaa_authorization
+#  parent: aaa
+#  key: 2
+#  grouping: implicit
+#- match: aaa accounting (\S+) (.*)$
+#  name: aaa_accounting
+#  parent: aaa
+#  key: 2
+#  grouping: implicit
+
+  # (?P<subfacility>\S+) (.*)
+#- match: (?P<immediate_leave>(?:no )?ip igmp snooping) vlan (\d+) immediate-leave
+  #parent: igmp_vlan
+#aaa authentication login default group tacacs+ local
+#aaa authentication enable default group tacacs+ enable
+#aaa authorization exec default group tacacs+ local 
+#aaa authorization commands 1 default group tacacs+ local 
+#aaa authorization commands 15 default group tacacs+ local 
+#aaa authorization network default group tacacs+ local 
+#aaa accounting exec default start-stop group tacacs+
+#aaa accounting network default start-stop group tacacs+
