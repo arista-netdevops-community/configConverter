@@ -153,23 +153,27 @@ def setupInterface(interface, oldInterface, policyMaps):
 
     if "service_policy" in oldInterface:
         sp = oldInterface.pop("service_policy")
-        # we will prefer the ingress policy over the egress policy
-        spName = sp.get("ingress", sp.get("egress", None))
-        pm = _findPolicyMap(spName, policyMaps)
-        if pm:
-            if "police" in pm["classes"][0]:
-                rate = int(pm["classes"][0]["police"]["rate"])
-                unit = pm["classes"][0]["police"]["rate_unit"]
-                if unit == "bps":
-                    rate = int(rate/1024)
-                    unit = "kbps"
-                elif unit == "mbps":
-                    rate = int(rate*1024)
-                    unit = "kbps"
-                elif unit == "pps":
-                    unit = "pps"
+        if egressPolicy := sp.get("egress", None):
+            pm = _findPolicyMap(egressPolicy, policyMaps)
+            if pm:
+                if "police" in pm["classes"][0]:
+                    rate = int(pm["classes"][0]["police"]["rate"])
+                    unit = pm["classes"][0]["police"]["rate_unit"]
+                    if unit == "bps":
+                        rate = int(rate/1024)
+                        unit = "kbps"
+                    elif unit == "mbps":
+                        rate = int(rate*1024)
+                        unit = "kbps"
+                    elif unit == "pps":
+                        unit = "pps"
 
-                newInterface["shape"] = { "rate": f'{rate} {unit}'}
+                    newInterface["shape"] = { "rate": f'{rate} {unit}'}
+
+        if ingressPolicy := sp.get("ingress", sp.get("egress", None)):
+            pm = _findPolicyMap(ingressPolicy, policyMaps)
+            if pm:
+                newInterface["service_policy"] = {"qos": {"input": pm["name"]}}
 
     ##### these are things i don't care about
     if "cdp_enable" in oldInterface:
