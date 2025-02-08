@@ -61,6 +61,7 @@ import itertools
 import ipaddress
 import yaml
 
+configNonMatchingLines = []
 
 class Tree(dict):
     """ Autovivificious dictionary with parent property as tree stucture """
@@ -320,7 +321,8 @@ def _parse(lines, context, indent=1, eob=None):
         if not matched:
             line = line.rstrip()
             if line and line[0] != "!":
-                print(f"did not match **{line}**")
+                #print(f"did not match **{line}**")
+                configNonMatchingLines.append(line)
     return result
 
 def _action(method, value):

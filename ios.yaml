@@ -137,7 +137,7 @@
   - match: standby (\d+) (ip|ipv6|priority) (\S+)
     parent: standby
     key: 1
-  - match: 'standby(?: (\d+))? (preempt)(?: delay minimum (?P<delay>\d+))?(?: reload (?P<reload>\d+))?'
+  - match: 'standby(?: (\d+))? (?P<preempt>preempt)(?: delay minimum (?P<delay>\d+))?(?: reload (?P<reload>\d+))?'
     parent: standby
   - match: 'standby (\d+) (track) (\d+)(?: (\S+))?(?: (\d+))?'
     parent: standby
@@ -147,6 +147,10 @@
   - match: standby (\d+) authentication md5 key-string 7 (?P<auth_md5>\S+)
     parent: standby
     actionall: decrypt7
+  - match: standby (\d+) authentication (?P<auth>\S+)
+    parent: standby
+  - match: standby (\d+) name (?P<vrid_name>.*)
+    parent: standby
   - match: ((?:no )?logging event) (\S+)
     parent: logging
     actionall: bool
