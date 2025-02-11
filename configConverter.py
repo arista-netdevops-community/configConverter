@@ -46,6 +46,9 @@ def setupInterface(interface, oldInterface, policyMaps):
 
     if "description" in oldInterface:
         newInterface["description"] = oldInterface.pop("description")
+        if isinstance(newInterface["description"], list):
+            notifications.append(f'We appear to have two copies of {newInterface["name"]} in the source config!')
+            return False
     if "vlans" in oldInterface:
         newInterface["vlans"] = oldInterface.pop("vlans")
     if "mode" in oldInterface:
@@ -140,6 +143,9 @@ def setupInterface(interface, oldInterface, policyMaps):
         #if "ethernet" in newInterface["name"].lower():
             #newInterface[] = no switchport
         newInterface["ip_address"] = oldInterface.pop("ipv4")
+        if isinstance(newInterface["ip_address"], list):
+            notifications.append(f'We appear to have two copies of {newInterface["name"]} in the source config!')
+            return False
 
     if "ipv4_secondary" in oldInterface:
         newInterface["ip_address_secondaries"] = []
@@ -353,15 +359,19 @@ if "class_map" in dev:
 
 for interface, interfaceConfig in dev["interface"].items():
     if interface.startswith("Gigabit"):
-        newDevice["ethernet_interfaces"].append(setupInterface(interface, interfaceConfig, newDevice["policy_maps"]))
+        if newInterface := setupInterface(interface, interfaceConfig, newDevice["policy_maps"]):
+            newDevice["ethernet_interfaces"].append(newInterface)
     elif interface.startswith("TenGiga"):
         newInterfaceName = "InvalidInterface1/10000"
         notifications.append(f"!!!!!!!!!!!!!!! added an invalid interface: {interface} -> {newInterfaceName}")
-        newDevice["ethernet_interfaces"].append(setupInterface(newInterfaceName, interfaceConfig, newDevice["policy_maps"]))
+        if newInterface := setupInterface(newInterfaceName, interfaceConfig, newDevice["policy_maps"]):
+            newDevice["ethernet_interfaces"].append(newInterface)
     elif interface.startswith("Vlan"):
-        newDevice["vlan_interfaces"].append(setupInterface(interface, interfaceConfig, newDevice["policy_maps"]))
+        if newInterface := setupInterface(interface, interfaceConfig, newDevice["policy_maps"]):
+            newDevice["vlan_interfaces"].append(newInterface)
     elif interface.startswith("Port"):
-        newDevice["port_channel_interfaces"].append(setupInterface(interface, interfaceConfig, newDevice["policy_maps"]))
+        if newInterface := setupInterface(interface, interfaceConfig, newDevice["policy_maps"]):
+            newDevice["port_channel_interfaces"].append(newInterface)
 
 
 if args.output == "text":
