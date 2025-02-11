@@ -7,6 +7,7 @@ import yaml
 import argparse
 import pyavd.get_device_config
 import re
+import sys
 from copy import deepcopy
 
 parser = argparse.ArgumentParser()
@@ -34,6 +35,9 @@ def setupInterface(interface, oldInterface, policyMaps):
     # this function will take the interface dict passed to it and convert it into
     #  pyavd config
     newInterface = {}
+    # there may be features that avd does not yet support and we need to add as
+    #  raw cli commands.  store any here
+    newInterfaceRawCLI = []
     if interface.startswith("Port") or interface.startswith("Vlan"):
         newInterface["name"] = interface
     else:
@@ -137,6 +141,16 @@ def setupInterface(interface, oldInterface, policyMaps):
             #newInterface[] = no switchport
         newInterface["ip_address"] = oldInterface.pop("ipv4")
 
+    if "ipv4_secondary" in oldInterface:
+        newInterface["ip_address_secondaries"] = []
+        if isinstance(oldInterface["ipv4_secondary"], list):
+            for sec in oldInterface["ipv4_secondary"]:
+                newInterface["ip_address_secondaries"].append(sec)
+        else:
+            newInterface["ip_address_secondaries"].append(oldInterface["ipv4_secondary"])
+
+        oldInterface.pop("ipv4_secondary")
+
     if "ipv4_redirects" in oldInterface:
         newInterface["ip_icmp_redirect"] = oldInterface.pop("ipv4_redirects")
 
@@ -176,6 +190,44 @@ def setupInterface(interface, oldInterface, policyMaps):
             if pm:
                 newInterface["service_policy"] = {"qos": {"input": pm["name"]}}
 
+    if "standby" in oldInterface:
+        newInterface["vrrp_ids"] = []
+        vrrp = deepcopy(oldInterface["standby"])
+        oldInterface["standby"].pop("version")
+        for vrid, vridData in vrrp.items():
+            if vrid.isdigit():
+                #ipv4 at least is pretty important
+                if "ip" not in vridData:
+                    continue
+
+                #  this is a new vrid.  convert it
+                newVRID = {
+                    "id": int(vrid),
+                    "ipv4": {
+                        "address": vridData["ip"],
+                        "version": 2
+                    }
+                }
+                if "priority" in vridData:
+                    newVRID["priority_level"] =  int(vridData["priority"])
+                if "preempt" in vridData:
+                    newVRID["preempt"] = { "enabled": True}
+                    if "delay" in vridData:
+                        newVRID["preempt"]["delay"] = { "minimum": int(vridData["delay"]) }
+                    if "reload" in vridData:
+                        newVRID["preempt"]["reload"] = { "minimum": int(vridData["delay"]) }
+                if "vrid_name" in vridData:
+                    newInterfaceRawCLI.append(f'vrrp {vrid} session description {vridData["vrid_name"]}')
+                if authString := vridData.get("auth_md5", vridData.get("auth", None)):
+                    newInterfaceRawCLI.append(f'vrrp {vrid} peer authentication {authString}')
+
+                newInterface["vrrp_ids"].append(newVRID)
+                oldInterface["standby"].pop(vrid)
+
+        if not oldInterface["standby"]:
+            oldInterface.pop("standby")
+
+
     ##### these are things i don't care about
     if "cdp_enable" in oldInterface:
         oldInterface.pop("cdp_enable")
@@ -190,10 +242,12 @@ def setupInterface(interface, oldInterface, policyMaps):
     # what's left?
     #print(yaml.dump(newInterface, sort_keys=False))
     if len(oldInterface) > 0:
-        print(f"****** {newInterface['name']}")
-        print(oldInterface)
-        print("******")
+        print(f"****** {newInterface['name']}", file=sys.stderr)
+        print(oldInterface, file=sys.stderr)
+        print("******", file=sys.stderr)
 
+    if newInterfaceRawCLI:
+        newInterface["eos_cli"] = "\n".join(newInterfaceRawCLI)
     return newInterface
 
 def setClassMaps(classMapName, classMap):
@@ -315,5 +369,12 @@ if args.output == "text":
 elif args.output == "yaml":
     print(yaml.dump(newDevice))
 
-for notification in notifications:
-    print(notification)
+if confparser.configNonMatchingLines:
+    print("did not match any regex on the following lines", file=sys.stderr)
+    for nonMatch in confparser.configNonMatchingLines:
+        print(nonMatch, file=sys.stderr)
+if notifications:
+    print("the following notifications where issued by the converter", file=sys.stderr)
+    for notification in notifications:
+        print(notification, file=sys.stderr)
+
