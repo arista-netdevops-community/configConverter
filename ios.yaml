@@ -64,6 +64,9 @@
 - match: (?:no )?lldp run
   name: lldp_run
   action: bool
+- match: access-list (\d+) (.*)
+  parent: ip_standard_access_list
+  key: 1
 - match: class-map match-(?P<match>\S+) (?!system-cpp)(\S+)
   parent: class_map
   child:

@@ -157,8 +157,10 @@ def setupInterface(interface, oldInterface, policyMaps):
 
         oldInterface.pop("ipv4_secondary")
 
-    if "ipv4_redirects" in oldInterface:
-        newInterface["ip_icmp_redirect"] = oldInterface.pop("ipv4_redirects")
+    if redir := oldInterface.pop("ipv4_redirects", True) == False:
+        # don't really like how i do this, but it's a global setting:
+        notifications.append(f'Interface {newInterface["name"]} called for no icmp redir.  disabling it globally!')
+        newDevice["ip_icmp_redirect"] = False
 
     if "ipv4_proxy_arp" in oldInterface:
         newInterface["ip_proxy_arp"] = oldInterface.pop("ipv4_proxy_arp")
@@ -233,6 +235,15 @@ def setupInterface(interface, oldInterface, policyMaps):
         if not oldInterface["standby"]:
             oldInterface.pop("standby")
 
+    if acl := oldInterface.pop("ipv4_acl", None):
+        if inDir := acl.pop("in", None):
+            if inDir not in dev["ip_standard_access_list"]:
+                notifications.append(f'Could not find acl {inDir} in the source config and it is used on {newInterface["name"]}')
+            newInterface["access_group_in"] = inDir
+        if outDir := acl.pop("out", None):
+            if outDir not in dev["ip_standard_access_list"]:
+                notifications.append(f'Could not find acl {outDir} in the source config and it is used on {newInterface["name"]}')
+            newInterface["access_group_out"] = outDir
 
     ##### these are things i don't care about
     if "cdp_enable" in oldInterface:
@@ -310,6 +321,9 @@ newDevice = {
         "port_channel_interfaces": [],
         "class_maps": {},
         "policy_maps": {},
+        "ip_access_lists": [],
+        "ipv6_access_lists": [],
+        "access_lists": [],
 }
 
 if "class_map" in dev:
@@ -324,7 +338,7 @@ if "class_map" in dev:
     #  any class-map in the config
 
     if matchAny:
-        newDevice["ip_access_lists"] = [
+        newDevice["ip_access_lists"].append(
                 {
                     "name": "matchAllv4",
                     "entries": [
@@ -337,8 +351,8 @@ if "class_map" in dev:
                         }
                     ]
                 }
-        ]
-        newDevice["ipv6_access_lists"] = [
+        )
+        newDevice["ipv6_access_lists"].append(
                 {
                     "name": "matchAllv6",
                     "sequence_numbers": [
@@ -348,14 +362,32 @@ if "class_map" in dev:
                         }
                     ]
                 }
-        ]
-
+        )
 
     if "policy_map" in dev:
         newDevice["policy_maps"]["qos"] = []
         for policyMapName, policyMap in dev["policy_map"].items():
             newDevice["policy_maps"]["qos"].append(setPolicyMaps(policyMapName, policyMap))
         dev.pop("policy_map")
+
+if "ip_standard_access_list" in dev:
+    # we have some access-lists we need to parse over
+    for aclName, aclData in dev["ip_standard_access_list"].items():
+        # could probably do this with a crafty comprehension, but we're trying to keep it simple
+        counter = 0
+        newACL = {
+                "name": aclName,
+                "sequence_numbers": []
+        }
+        for aclLine in aclData:
+            counter += 10
+            newACL["sequence_numbers"].append(
+                    {
+                        "sequence": counter,
+                        "action": aclLine
+                    }
+            )
+        newDevice["access_lists"].append(newACL)
 
 for interface, interfaceConfig in dev["interface"].items():
     if interface.startswith("Gigabit"):
