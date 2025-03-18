@@ -373,6 +373,8 @@ if "class_map" in dev:
 if "ip_standard_access_list" in dev:
     # we have some access-lists we need to parse over
     for aclName, aclData in dev["ip_standard_access_list"].items():
+        if not isinstance(aclData, list):
+            aclData = [aclData]
         # could probably do this with a crafty comprehension, but we're trying to keep it simple
         counter = 0
         newACL = {
