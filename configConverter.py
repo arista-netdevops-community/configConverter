@@ -201,7 +201,7 @@ def setupInterface(interface, oldInterface, policyMaps):
     if "standby" in oldInterface:
         newInterface["vrrp_ids"] = []
         vrrp = deepcopy(oldInterface["standby"])
-        oldInterface["standby"].pop("version")
+        oldInterface["standby"].pop("version", 2)
         for vrid, vridData in vrrp.items():
             if vrid.isdigit():
                 #ipv4 at least is pretty important
