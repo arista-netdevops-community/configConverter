@@ -202,20 +202,31 @@ def setupInterface(interface, oldInterface, policyMaps):
         newInterface["vrrp_ids"] = []
         vrrp = deepcopy(oldInterface["standby"])
         oldInterface["standby"].pop("version", 2)
+
+        # avd doesn't support secondaries on vrrp yet.  we need to hack that
+        vrrpSecondaries = []
         for vrid, vridData in vrrp.items():
             if vrid.isdigit():
                 #ipv4 at least is pretty important
                 if "ip" not in vridData:
                     continue
 
+                if not isinstance(vridData["ip"], list):
+                    vridData["ip"] = [vridData["ip"]]
+
                 #  this is a new vrid.  convert it
                 newVRID = {
                     "id": int(vrid),
                     "ipv4": {
-                        "address": vridData["ip"],
+                        "address": vridData["ip"].pop(),
                         "version": 2
                     }
                 }
+                # pyavd doesn't support secondaries on vrrp yet.  we need to hack it
+                if vridData["ip"]:
+                    for vrrpSecondary in vridData["ip"]:
+                        newInterfaceRawCLI.append(f'vrrp {int(vrid)} ipv4 {vrrpSecondary} secondary')
+
                 if "priority" in vridData:
                     newVRID["priority_level"] =  int(vridData["priority"])
                 if "preempt" in vridData:
