@@ -15,10 +15,18 @@ parser.add_argument("-i", required=True, help="input file")
 parser.add_argument("--dissector", default="ios.yaml", help="dissector file. default=ios.yaml")
 parser.add_argument("--output", default="text", help="default=text, text|yaml")
 parser.add_argument("--debug", default=False, action="store_true", help="emit some debug values")
+parser.add_argument("--classOverride", default=[], action="append", nargs=2, help="specify a source class-map name and a destination class-map name to replace usage of a classmap")
 
 args = parser.parse_args()
 
 notifications = []
+
+def _findClassMapOverride(srcMap: str) -> str:
+    for param in args.classOverride:
+        if param[0] == srcMap:
+            return param[1]
+
+    return srcMap
 
 def _findPolicyMap(pm, policyMaps):
     if pm == None or "qos" not in policyMaps:
@@ -204,6 +212,9 @@ def setupInterface(interface, oldInterface, policyMaps):
         oldInterface["standby"].pop("version", 2)
 
         # avd doesn't support secondaries on vrrp yet.  we need to hack that
+        # FIXME: we need to use a single group here, so ignore the vrid
+        # FIXME: use group 9```
+
         vrrpSecondaries = []
         for vrid, vridData in vrrp.items():
             if vrid.isdigit():
@@ -290,7 +301,7 @@ def setPolicyMaps(policyMapName, policyMap):
     newPolicyMap = { "name": policyMapName }
     newPolicyMap["classes"] = []
     for className, classEntry in policyMap["class"].items():
-        newClass = { "name": className }
+        newClass = { "name": _findClassMapOverride(className) }
         if "police" in classEntry:
             newClass["police"] = {}
             if "rate" in classEntry["police"]:
